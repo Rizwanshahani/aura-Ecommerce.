@@ -14,15 +14,16 @@ app.use(cors({
     credentials: true
 }))
 
-// Middleware: ensure DB is connected before every request
+// Connect to DB before handling any API request
 app.use(async (req, res, next) => {
     try {
         await connectDB();
         next();
-    } catch (error) {
+    } catch (err) {
+        console.error('DB connection error:', err.message);
         return res.status(500).json({
             success: false,
-            message: `Database connection failed: ${error.message}`
+            message: 'Database connection failed: ' + err.message
         });
     }
 });
@@ -31,27 +32,28 @@ app.use('/api/v1/user', userRoute)
 app.use('/api/v1/product', productRoutes)
 app.use('/api/v1/order', orderRoutes)
 
-// Healthcheck — shows DB connection status and env var presence
-app.get('/api/v1/healthcheck', (req, res) => {
+app.get('/api/v1/healthcheck', async (req, res) => {
+    const mongoose = await import('mongoose');
     res.json({
         success: true,
-        message: 'Server is healthy',
         mongo_uri_set: !!process.env.MONGO_URI,
-        secret_key_set: !!process.env.SECRET_KEY,
+        mongo_uri_preview: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 40) + '...' : 'NOT SET',
+        readyState: mongoose.default.connection.readyState,
         node_env: process.env.NODE_ENV || 'not set'
     });
 });
 
-// Debug — attempts a live DB connection and returns the exact error
 app.get('/api/v1/debug', async (req, res) => {
     try {
+        await connectDB();
         const mongoose = await import('mongoose');
-        const uri = process.env.MONGO_URI;
-        if (!uri) return res.json({ success: false, error: 'MONGO_URI not set' });
-        await mongoose.default.connect(uri);
-        res.json({ success: true, message: 'DB connected OK', readyState: mongoose.default.connection.readyState });
+        res.json({
+            success: true,
+            readyState: mongoose.default.connection.readyState,
+            host: mongoose.default.connection.host
+        });
     } catch (err) {
-        res.json({ success: false, error: err.message, code: err.code });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -59,7 +61,7 @@ app.get('/api/v1/debug', async (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
-        console.log(`Server is listening at port: ${PORT}`);
+        console.log(`Server running on port: ${PORT}`);
     });
 }
 
