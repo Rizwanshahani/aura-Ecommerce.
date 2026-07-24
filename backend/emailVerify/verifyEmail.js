@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+dotenv.config({ override: false })
 
 export const verifyEmail= (token, email)=>{
     const transporter = nodemailer.createTransport({
