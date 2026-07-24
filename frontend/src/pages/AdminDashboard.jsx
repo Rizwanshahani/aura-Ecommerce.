@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit, X } from "lucide-react";
+import { Plus, Trash2, Edit, X, ImagePlus, UploadCloud } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -31,6 +31,7 @@ const AdminDashboard = () => {
     const [showProductModal, setShowProductModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingProductId, setEditingProductId] = useState(null);
+    const [imageFile, setImageFile] = useState(null); // holds the local File object for preview
     const [productForm, setProductForm] = useState({
         name: "",
         description: "",
@@ -94,9 +95,22 @@ const AdminDashboard = () => {
         });
     };
 
+    // Convert picked file → base64 and store in productForm.image
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setProductForm((prev) => ({ ...prev, image: reader.result }));
+        };
+        reader.readAsDataURL(file);
+    };
+
     const openAddProductModal = () => {
         setIsEditing(false);
         setEditingProductId(null);
+        setImageFile(null);
         setProductForm({
             name: "",
             description: "",
@@ -111,6 +125,7 @@ const AdminDashboard = () => {
     const openEditProductModal = (product) => {
         setIsEditing(true);
         setEditingProductId(product._id);
+        setImageFile(null); // reset local file; existing image URL shown as preview
         setProductForm({
             name: product.name,
             description: product.description,
@@ -399,19 +414,23 @@ const AdminDashboard = () => {
                 {/* Add/Edit Product Modal Dialog */}
                 {showProductModal && (
                     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                            <button
-                                onClick={() => setShowProductModal(false)}
-                                className="absolute right-5 top-5 p-1 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100"
-                            >
-                                <X size={20} />
-                            </button>
+                        <div className="bg-white rounded-3xl shadow-2xl relative w-full max-w-md flex flex-col max-h-[92vh]">
 
-                            <h3 className="text-xl font-bold text-slate-900 mb-6">
-                                {isEditing ? "Edit Product Details" : "Add New Product"}
-                            </h3>
+                            {/* Modal Header — always visible */}
+                            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+                                <h3 className="text-xl font-bold text-slate-900">
+                                    {isEditing ? "Edit Product Details" : "Add New Product"}
+                                </h3>
+                                <button
+                                    onClick={() => setShowProductModal(false)}
+                                    className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                            <form onSubmit={handleProductSubmit} className="space-y-4">
+                            {/* Scrollable form body */}
+                            <form id="product-form" onSubmit={handleProductSubmit} className="overflow-y-auto px-6 py-4 space-y-4 flex-1">
                                 <div className="grid gap-1.5">
                                     <Label htmlFor="name">Product Name</Label>
                                     <Input
@@ -431,7 +450,7 @@ const AdminDashboard = () => {
                                         rows={3}
                                         value={productForm.description}
                                         onChange={handleProductFormChange}
-                                        className="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-750 focus:border-pink-500 outline-none"
+                                        className="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-750 focus:border-pink-500 outline-none resize-none"
                                         required
                                     ></textarea>
                                 </div>
@@ -443,6 +462,8 @@ const AdminDashboard = () => {
                                             id="price"
                                             name="price"
                                             type="number"
+                                            min="0"
+                                            step="0.01"
                                             value={productForm.price}
                                             onChange={handleProductFormChange}
                                             required
@@ -454,6 +475,7 @@ const AdminDashboard = () => {
                                             id="stock"
                                             name="stock"
                                             type="number"
+                                            min="0"
                                             value={productForm.stock}
                                             onChange={handleProductFormChange}
                                             required
@@ -471,32 +493,66 @@ const AdminDashboard = () => {
                                         className="w-full border border-slate-200 rounded-lg p-2.5 text-sm text-slate-750 focus:border-pink-500 outline-none bg-white"
                                     >
                                         {categories.map((cat) => (
-                                            <option key={cat} value={cat}>
-                                                {cat}
-                                            </option>
+                                            <option key={cat} value={cat}>{cat}</option>
                                         ))}
                                     </select>
                                 </div>
 
+                                {/* Image Picker */}
                                 <div className="grid gap-1.5">
-                                    <Label htmlFor="image">Image URL</Label>
-                                    <Input
-                                        id="image"
-                                        name="image"
-                                        placeholder="https://example.com/image.jpg"
-                                        value={productForm.image}
-                                        onChange={handleProductFormChange}
-                                        required
-                                    />
-                                </div>
+                                    <Label>Product Image</Label>
 
+                                    {/* Drop-zone / click-to-browse */}
+                                    <label
+                                        htmlFor="image-upload"
+                                        className="group flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 hover:border-pink-400 rounded-2xl p-5 cursor-pointer transition-colors bg-slate-50 hover:bg-pink-50"
+                                    >
+                                        {productForm.image ? (
+                                            <img
+                                                src={productForm.image}
+                                                alt="Preview"
+                                                className="w-full max-h-40 object-contain rounded-xl"
+                                            />
+                                        ) : (
+                                            <>
+                                                <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center group-hover:bg-pink-200 transition-colors">
+                                                    <ImagePlus size={22} className="text-pink-500" />
+                                                </div>
+                                                <p className="text-sm font-semibold text-slate-600">Click to browse image</p>
+                                                <p className="text-xs text-slate-400">PNG, JPG, WEBP up to 5 MB</p>
+                                            </>
+                                        )}
+                                        <input
+                                            id="image-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleImageChange}
+                                        />
+                                    </label>
+
+                                    {/* Change button shown after image selected */}
+                                    {productForm.image && (
+                                        <label
+                                            htmlFor="image-upload"
+                                            className="flex items-center gap-1.5 text-xs font-semibold text-pink-600 hover:text-pink-700 cursor-pointer w-fit"
+                                        >
+                                            <UploadCloud size={14} /> Change image
+                                        </label>
+                                    )}
+                                </div>
+                            </form>
+
+                            {/* Modal Footer — Save button always visible */}
+                            <div className="px-6 py-4 border-t border-slate-100 shrink-0">
                                 <Button
                                     type="submit"
-                                    className="w-full bg-pink-650 hover:bg-pink-700 text-white font-bold h-11 rounded-xl cursor-pointer mt-4"
+                                    form="product-form"
+                                    className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold h-11 rounded-xl cursor-pointer"
                                 >
-                                    {isEditing ? "Update Product" : "Publish Product"}
+                                    {isEditing ? "Update Product" : "Save Product"}
                                 </Button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 )}
