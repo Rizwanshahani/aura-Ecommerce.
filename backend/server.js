@@ -7,9 +7,12 @@ import orderRoutes from './routes/orderRoutes.js'
 import cors from 'cors'
 
 const app = express()
-const PORT = process.env.PORT || 8000; // Fallback to 8000 matching env
 
-app.use(express.json());
+// Connect to MongoDB immediately at module load time
+// (Required for Vercel serverless — app.listen() never runs there)
+connectDB();
+
+app.use(express.json({ limit: '10mb' }));
 app.use(cors({
     origin: true,
     credentials: true
@@ -23,7 +26,12 @@ app.get('/api/v1/healthcheck', (req, res) => {
     res.json({ success: true, message: 'Server is healthy and routes are loaded' });
 });
 
-app.listen(PORT,()=>{
-    connectDB()
-    console.log(`server is listening at port:${PORT}`);
-})
+// Only listen when running locally (not on Vercel)
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 8000;
+    app.listen(PORT, () => {
+        console.log(`Server is listening at port: ${PORT}`);
+    });
+}
+
+export default app;
