@@ -42,6 +42,19 @@ app.get('/api/v1/healthcheck', (req, res) => {
     });
 });
 
+// Debug — attempts a live DB connection and returns the exact error
+app.get('/api/v1/debug', async (req, res) => {
+    try {
+        const mongoose = await import('mongoose');
+        const uri = process.env.MONGO_URI;
+        if (!uri) return res.json({ success: false, error: 'MONGO_URI not set' });
+        await mongoose.default.connect(uri);
+        res.json({ success: true, message: 'DB connected OK', readyState: mongoose.default.connection.readyState });
+    } catch (err) {
+        res.json({ success: false, error: err.message, code: err.code });
+    }
+});
+
 // Only listen locally
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 8000;
