@@ -1,22 +1,30 @@
 import mongoose from "mongoose";
 
-let isConnected = false;
+let connectionPromise = null;
 
 const connectDB = async () => {
-    if (isConnected) return; // reuse existing connection on Vercel
+    // If already connected, return immediately
+    if (mongoose.connection.readyState === 1) return;
+
+    // If a connection is in progress, wait for it
+    if (connectionPromise) return connectionPromise;
 
     if (!process.env.MONGO_URI) {
-        console.error("❌ MONGO_URI environment variable is not set!");
         throw new Error("MONGO_URI is not defined in environment variables");
     }
 
+    connectionPromise = mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+    });
+
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        isConnected = true;
-        console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+        await connectionPromise;
+        console.log(`✅ MongoDB connected: ${mongoose.connection.host}`);
     } catch (error) {
+        connectionPromise = null; // reset so next request can retry
         console.error("❌ MongoDB connection failed:", error.message);
-        throw error; // re-throw so the caller knows
+        throw error;
     }
 };
 
