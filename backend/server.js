@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config({ override: false }) // Vercel env vars take priority over .env file
 import connectDB from './database/db.js';
+import { seedProducts } from './seed/productSeeder.js';
 import userRoute from './routes/userRoute.js'
 import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
@@ -28,6 +29,9 @@ app.use(async (req, res, next) => {
         });
     }
 });
+
+// One-time seed route — populates Atlas if empty
+app.get('/api/v1/seed', seedProducts);
 
 app.use('/api/v1/user', userRoute)
 app.use('/api/v1/product', productRoutes)
