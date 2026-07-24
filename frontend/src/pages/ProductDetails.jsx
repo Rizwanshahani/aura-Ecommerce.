@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import api from "@/lib/api";
 import { setSelectedProduct, setLoading, setError } from "@/redux/productSlice";
 import { addToCart } from "@/redux/cartSlice";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ const ProductDetails = () => {
     const fetchProductDetails = useCallback(async () => {
         try {
             dispatch(setLoading(true));
-            const res = await axios.get(`http://localhost:8000/api/v1/product/${id}`);
+            const res = await api.get(`/product/${id}`);
             if (res.data.success) {
                 dispatch(setSelectedProduct(res.data.product));
             }
@@ -67,8 +67,8 @@ const ProductDetails = () => {
 
         try {
             setSubmittingReview(true);
-            const res = await axios.post(
-                `http://localhost:8000/api/v1/product/${id}/reviews`,
+            const res = await api.post(
+                `/product/${id}/reviews`,
                 { rating, comment },
                 {
                     headers: {

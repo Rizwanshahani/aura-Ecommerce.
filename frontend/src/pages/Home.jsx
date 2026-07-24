@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import axios from "axios";
+import api from "@/lib/api";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
@@ -50,7 +50,7 @@ const Home = () => {
     const fetchFeaturedProducts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:8000/api/v1/product");
+        const res = await api.get("/product");
         if (res.data.success) setFeaturedProducts(res.data.products.slice(0, 8));
       } catch {
         setFeaturedProducts([

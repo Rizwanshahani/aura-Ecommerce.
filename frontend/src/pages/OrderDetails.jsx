@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CreditCard, Package, Truck, CheckCircle2, ArrowLeft } from "lucide-react";
@@ -20,7 +20,7 @@ const OrderDetails = () => {
 
         try {
             setLoading(true);
-            const res = await axios.get(`http://localhost:8000/api/v1/order/${id}`, {
+            const res = await api.get(`/order/${id}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }

@@ -1,7 +1,7 @@
 import { ShoppingCart, ShieldAlert, LogOut, User, Menu, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
-import axios from "axios";
+import api from "@/lib/api";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/redux/UserSlice";
@@ -31,7 +31,7 @@ const Navbar = () => {
 
   const logoutHandler = async () => {
     try {
-      const res = await axios.post(`http://localhost:8000/api/v1/user/logout`, {}, {
+      const res = await api.post(`/user/logout`, {}, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }

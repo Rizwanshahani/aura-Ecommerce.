@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     const fetchAdminProducts = async () => {
         try {
             setProductsLoading(true);
-            const res = await axios.get("http://localhost:8000/api/v1/product");
+            const res = await api.get("/product");
             if (res.data.success) {
                 setProducts(res.data.products);
             }
@@ -62,7 +62,7 @@ const AdminDashboard = () => {
         if (!accessToken) return;
         try {
             setOrdersLoading(true);
-            const res = await axios.get("http://localhost:8000/api/v1/order/allorders", {
+            const res = await api.get("/order/allorders", {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -145,8 +145,8 @@ const AdminDashboard = () => {
         try {
             if (isEditing) {
                 // Update
-                const res = await axios.put(
-                    `http://localhost:8000/api/v1/product/${editingProductId}`,
+                const res = await api.put(
+                    `/product/${editingProductId}`,
                     productForm,
                     {
                         headers: {
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
                 }
             } else {
                 // Create
-                const res = await axios.post("http://localhost:8000/api/v1/product", productForm, {
+                const res = await api.post("/product", productForm, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                         "Content-Type": "application/json"
@@ -186,7 +186,7 @@ const AdminDashboard = () => {
         if (!accessToken) return;
 
         try {
-            const res = await axios.delete(`http://localhost:8000/api/v1/product/${id}`, {
+            const res = await api.delete(`/product/${id}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -206,8 +206,8 @@ const AdminDashboard = () => {
         if (!accessToken) return;
 
         try {
-            const res = await axios.put(
-                `http://localhost:8000/api/v1/order/${orderId}/status`,
+            const res = await api.put(
+                `/order/${orderId}/status`,
                 { status: newStatus },
                 {
                     headers: {

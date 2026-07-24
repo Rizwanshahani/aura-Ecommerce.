@@ -11,8 +11,12 @@ const PORT = process.env.PORT || 8000; // Fallback to 8000 matching env
 
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
-    credentials:true
+    origin: [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'https://aura-ecommerce-5c8m.vercel.app'
+    ],
+    credentials: true
 }))
 
 app.use('/api/v1/user', userRoute)

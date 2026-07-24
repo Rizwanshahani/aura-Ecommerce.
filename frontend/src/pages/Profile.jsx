@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/redux/UserSlice";
-import axios from "axios";
+import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +33,7 @@ const Profile = () => {
 
         try {
             setOrdersLoading(true);
-            const res = await axios.get("http://localhost:8000/api/v1/order/myorders", {
+            const res = await api.get("/order/myorders", {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -89,7 +89,7 @@ const Profile = () => {
 
         try {
             setUpdatingProfile(true);
-            const res = await axios.put("http://localhost:8000/api/v1/user/update", formData, {
+            const res = await api.put("/user/update", formData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     "Content-Type": "application/json"

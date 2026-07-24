@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 import { useDispatch, useSelector } from "react-redux";
 import { setProducts, setLoading, setError } from "@/redux/productSlice";
 import { addToCart } from "@/redux/cartSlice";
@@ -32,7 +32,7 @@ const Products = () => {
             if (maxPrice) params.append("maxPrice", maxPrice);
             if (sort) params.append("sort", sort);
 
-            const res = await axios.get(`http://localhost:8000/api/v1/product?${params.toString()}`);
+            const res = await api.get(`/product?${params.toString()}`);
             if (res.data.success) {
                 dispatch(setProducts(res.data.products));
             }

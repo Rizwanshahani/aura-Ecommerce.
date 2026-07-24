@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import axios from 'axios'
+import api from '@/lib/api'
 import { toast } from 'sonner'
 import { useDispatch } from 'react-redux'
 import { setUser } from '@/redux/UserSlice'
@@ -40,7 +40,7 @@ const Login = () => {
       console.log(formData);
       try {
           setLoading(true)
-          const res= await axios.post(`http://localhost:8000/api/v1/user/login`,formData,{
+          const res= await api.post(`/user/login`,formData,{
               headers:{
                   "Content-Type":"application/json"
               }
