@@ -1,23 +1,27 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGO_URI;
+const ATLAS_URI = "mongodb+srv://rizwanshahani432_db_user:CcdVdPzYRNHPvJox@cluster0.rqiwjon.mongodb.net/aura-yt?appName=Cluster0";
 
 const connectDB = async () => {
-    if (mongoose.connection.readyState >= 1) {
-        return; // already connected or connecting
-    }
+    if (mongoose.connection.readyState === 1) return; // already connected
 
-    if (!MONGO_URI) {
-        throw new Error("MONGO_URI environment variable is missing");
-    }
+    // Use Vercel dashboard env var if available, otherwise use Atlas URI directly
+    const uri = process.env.MONGO_URI && !process.env.MONGO_URI.includes('localhost')
+        ? process.env.MONGO_URI
+        : ATLAS_URI;
 
-    return mongoose.connect(MONGO_URI, {
-        bufferCommands: false,
-        serverSelectionTimeoutMS: 15000,
-        connectTimeoutMS: 15000,
-        socketTimeoutMS: 30000,
-        maxPoolSize: 10,
-    });
+    try {
+        await mongoose.connect(uri, {
+            serverSelectionTimeoutMS: 15000,
+            connectTimeoutMS: 15000,
+            socketTimeoutMS: 30000,
+            maxPoolSize: 10,
+        });
+        console.log(`✅ MongoDB connected: ${mongoose.connection.host}`);
+    } catch (error) {
+        console.error("❌ MongoDB connection failed:", error.message);
+        throw error;
+    }
 };
 
 export default connectDB;
