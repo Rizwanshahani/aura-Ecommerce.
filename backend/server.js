@@ -37,6 +37,35 @@ app.get('/api/v1/seed', seedProducts);
 // One-time setup: clears DB and creates admin account
 app.get('/api/v1/setup-admin', setupAdmin);
 
+// Test email configuration
+app.get('/api/v1/test-email', async (req, res) => {
+    try {
+        const nodemailer = await import('nodemailer');
+        const transporter = nodemailer.default.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS
+            }
+        });
+        await transporter.verify();
+        res.json({
+            success: true,
+            message: '✅ Email config is valid! Credentials work.',
+            mail_user: process.env.MAIL_USER,
+            mail_pass_set: !!process.env.MAIL_PASS
+        });
+    } catch (err) {
+        res.json({
+            success: false,
+            error: err.message,
+            mail_user: process.env.MAIL_USER,
+            mail_pass_set: !!process.env.MAIL_PASS,
+            fix: 'Generate a Gmail App Password for ' + process.env.MAIL_USER + ' at myaccount.google.com/apppasswords'
+        });
+    }
+});
+
 app.use('/api/v1/user', userRoute)
 app.use('/api/v1/product', productRoutes)
 app.use('/api/v1/order', orderRoutes)
