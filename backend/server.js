@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 dotenv.config({ override: false }) // Vercel env vars take priority over .env file
 import connectDB from './database/db.js';
 import { seedProducts } from './seed/productSeeder.js';
+import { setupAdmin } from './seed/adminSetup.js';
 import userRoute from './routes/userRoute.js'
 import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
@@ -34,45 +35,7 @@ app.use(async (req, res, next) => {
 app.get('/api/v1/seed', seedProducts);
 
 // One-time setup: clears DB and creates admin account
-app.get('/api/v1/setup-admin', async (req, res) => {
-    try {
-        const bcrypt = await import('bcryptjs');
-        const User = (await import('./models/userModel.js')).default;
-        const Product = (await import('./models/productModel.js')).default;
-        const Order = (await import('./models/orderModel.js')).default;
-
-        // Clear all existing data
-        await User.deleteMany({});
-        await Order.deleteMany({});
-        console.log('🗑️ All users and orders deleted');
-
-        // Create admin account
-        const hashedPassword = await bcrypt.default.hash('Admin@1234', 10);
-        const admin = await User.create({
-            firstName: 'Rizwan',
-            lastName: 'Shahani',
-            email: 'rizwanshahani432@gmail.com',
-            password: hashedPassword,
-            role: 'admin',
-            isVerified: true,
-            isLoggedIn: false
-        });
-
-        console.log('✅ Admin account created:', admin.email);
-
-        res.json({
-            success: true,
-            message: '✅ Database cleared & admin created!',
-            admin: {
-                email: admin.email,
-                role: admin.role,
-                password: 'Admin@1234'
-            }
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
+app.get('/api/v1/setup-admin', setupAdmin);
 
 app.use('/api/v1/user', userRoute)
 app.use('/api/v1/product', productRoutes)
