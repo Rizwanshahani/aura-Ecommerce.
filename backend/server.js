@@ -33,6 +33,47 @@ app.use(async (req, res, next) => {
 // One-time seed route — populates Atlas if empty
 app.get('/api/v1/seed', seedProducts);
 
+// One-time setup: clears DB and creates admin account
+app.get('/api/v1/setup-admin', async (req, res) => {
+    try {
+        const bcrypt = await import('bcryptjs');
+        const User = (await import('./models/userModel.js')).default;
+        const Product = (await import('./models/productModel.js')).default;
+        const Order = (await import('./models/orderModel.js')).default;
+
+        // Clear all existing data
+        await User.deleteMany({});
+        await Order.deleteMany({});
+        console.log('🗑️ All users and orders deleted');
+
+        // Create admin account
+        const hashedPassword = await bcrypt.default.hash('Admin@1234', 10);
+        const admin = await User.create({
+            firstName: 'Rizwan',
+            lastName: 'Shahani',
+            email: 'rizwanshahani432@gmail.com',
+            password: hashedPassword,
+            role: 'admin',
+            isVerified: true,
+            isLoggedIn: false
+        });
+
+        console.log('✅ Admin account created:', admin.email);
+
+        res.json({
+            success: true,
+            message: '✅ Database cleared & admin created!',
+            admin: {
+                email: admin.email,
+                role: admin.role,
+                password: 'Admin@1234'
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 app.use('/api/v1/user', userRoute)
 app.use('/api/v1/product', productRoutes)
 app.use('/api/v1/order', orderRoutes)
