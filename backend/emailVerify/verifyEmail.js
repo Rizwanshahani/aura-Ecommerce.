@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 
-export const verifyEmail = (token, email) => {
+export const verifyEmail = async (token, email) => {
     const SITE_URL = process.env.SITE_URL || 'https://aura-ecommerce-5c8m.vercel.app';
 
     const transporter = nodemailer.createTransport({
@@ -26,13 +26,13 @@ export const verifyEmail = (token, email) => {
             <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <h2 style="color: #333; margin-top: 0;">Verify Your Email Address</h2>
                 <p style="color: #666; line-height: 1.6;">
-                    Hi there! Thanks for registering at Aura Store. 
-                    Please click the button below to verify your email address and activate your account.
+                    Hi there! Thanks for registering at Aura Store.
+                    Please click the button below to verify your email and activate your account.
                 </p>
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${verifyLink}" 
-                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                              color: white; padding: 14px 32px; text-decoration: none; 
+                    <a href="${verifyLink}"
+                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                              color: white; padding: 14px 32px; text-decoration: none;
                               border-radius: 6px; font-size: 16px; font-weight: bold; display: inline-block;">
                         ✅ Verify My Account
                     </a>
@@ -50,11 +50,7 @@ export const verifyEmail = (token, email) => {
         </div>`
     };
 
-    transporter.sendMail(mailConfigurations, (error, info) => {
-        if (error) {
-            console.error('❌ Email send failed:', error.message);
-        } else {
-            console.log('✅ Verification email sent to:', email);
-        }
-    });
+    // Use Promise so Vercel waits for email to send before returning response
+    await transporter.sendMail(mailConfigurations);
+    console.log('✅ Verification email sent to:', email);
 };
