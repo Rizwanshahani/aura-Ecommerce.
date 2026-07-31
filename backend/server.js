@@ -37,6 +37,20 @@ app.get('/api/v1/seed', seedProducts);
 // One-time setup: clears DB and creates admin account
 app.get('/api/v1/setup-admin', setupAdmin);
 
+// Delete all users except admin
+app.get('/api/v1/clear-users', async (req, res) => {
+    try {
+        const User = (await import('./models/userModel.js')).default;
+        const result = await User.deleteMany({ role: { $ne: 'admin' } });
+        res.json({
+            success: true,
+            message: `✅ Deleted ${result.deletedCount} non-admin users. Admin account kept.`
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Test email configuration
 app.get('/api/v1/test-email', async (req, res) => {
     try {
