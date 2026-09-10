@@ -209,132 +209,152 @@ const Home = () => {
 
           {/* Section header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-400 flex items-center gap-1.5">
-                  <Flame size={12} className="fill-pink-400" /> Limited Time Offers
-                </span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-pink-400 flex items-center gap-1.5">
+                    <Flame size={12} className="fill-pink-400" /> Limited Time Offers
+                  </span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none">Deals of the Day</h2>
+                <p className="text-slate-400 text-sm max-w-sm">Hurry — offers valid only while stock lasts.</p>
               </div>
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-none">Deals of the Day</h2>
-              <p className="text-slate-400 text-sm max-w-sm">Hurry — offers valid only while stock lasts.</p>
+
+              {/* Countdown & Quick Link */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex items-center gap-4 bg-slate-950/70 border border-slate-800 rounded-2xl px-6 py-4 backdrop-blur-sm">
+                  <Clock size={18} className="text-pink-400" />
+                  <div>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Ends in</p>
+                    <div className="flex items-center gap-1.5 font-mono font-black text-white">
+                      {[timeLeft.hours, timeLeft.minutes, timeLeft.seconds].map((val, i) => (
+                        <React.Fragment key={i}>
+                          <div className="flex flex-col items-center">
+                            <span className="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-sm tabular-nums">
+                              {String(val).padStart(2, "0")}
+                            </span>
+                          </div>
+                          {i < 2 && <span className="text-pink-500 text-base">:</span>}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Countdown */}
-            <div className="flex items-center gap-4 bg-slate-950/70 border border-slate-800 rounded-2xl px-6 py-4 backdrop-blur-sm">
-              <Clock size={18} className="text-pink-400" />
-              <div>
-                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Ends in</p>
-                <div className="flex items-center gap-1.5 font-mono font-black text-white">
-                  {[timeLeft.hours, timeLeft.minutes, timeLeft.seconds].map((val, i) => (
-                    <React.Fragment key={i}>
-                      <div className="flex flex-col items-center">
-                        <span className="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-sm tabular-nums">
-                          {String(val).padStart(2, "0")}
+            {/* Deals grid */}
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-slate-800/50 border border-slate-800 rounded-3xl h-[440px]" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {dealProducts.map((p) => (
+                  <div
+                    key={p._id}
+                    className="group bg-slate-950/60 border border-slate-800 rounded-3xl overflow-hidden hover:border-pink-500/40 shadow-xl hover:shadow-pink-500/10 transition-all duration-500 flex flex-col"
+                  >
+                    {/* Image */}
+                    <Link to={`/product/${p._id}`} className="relative block bg-slate-900 overflow-hidden h-56">
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+                      <span className="absolute top-4 left-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
+                        -{p.discount}% OFF
+                      </span>
+                      {/* Quick-view pill on hover */}
+                      <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                        <span className="bg-white/95 text-slate-900 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md">
+                          View Deal
                         </span>
                       </div>
-                      {i < 2 && <span className="text-pink-500 text-base">:</span>}
-                    </React.Fragment>
-                  ))}
-                </div>
+                      {p.stock === 0 && (
+                        <span className="absolute inset-0 bg-slate-950/75 flex items-center justify-center text-white text-xs font-black uppercase tracking-widest">
+                          Sold Out
+                        </span>
+                      )}
+                    </Link>
+
+                    {/* Body */}
+                    <div className="p-6 flex flex-col flex-grow space-y-4">
+                      <div>
+                        <span className="text-[9px] font-black uppercase tracking-[0.18em] text-pink-400">{p.category}</span>
+                        <Link to={`/product/${p._id}`} className="hover:text-pink-400 transition-colors block mt-1">
+                          <h4 className="font-extrabold text-base text-white truncate leading-snug">{p.name}</h4>
+                        </Link>
+                      </div>
+
+                      {/* Stars */}
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex text-amber-400">
+                          {[...Array(5)].map((_, idx) => (
+                            <Star key={idx} size={11} className={idx < Math.round(p.rating) ? "fill-amber-400 text-amber-400" : "text-slate-700"} />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-bold">({p.numReviews})</span>
+                      </div>
+
+                      {/* Claim bar */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[11px] font-bold">
+                          <span className="text-slate-400">Claimed <strong className="text-white">{p.claimedPercent}%</strong></span>
+                          <span className="text-pink-400">Only {p.stockLeft} left!</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-pink-500 to-purple-600 h-full rounded-full"
+                            style={{ width: `${p.claimedPercent}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Price + CTA Buttons */}
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 mt-auto">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-black text-white">${p.price}</span>
+                          <span className="text-xs text-slate-600 line-through font-semibold">${p.originalPrice}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Link to={`/product/${p._id}`}>
+                            <Button
+                              variant="outline"
+                              className="border-slate-700 hover:border-pink-500/60 hover:bg-slate-800 text-slate-200 hover:text-white h-9 rounded-xl px-3 cursor-pointer text-xs font-bold transition-all"
+                            >
+                              View Deal
+                            </Button>
+                          </Link>
+                          <Button
+                            disabled={p.stock === 0}
+                            onClick={(e) => handleAddToCart(p, e)}
+                            className="bg-pink-600 hover:bg-pink-500 text-white h-9 rounded-xl px-3.5 cursor-pointer text-xs gap-1.5 font-bold shadow-lg shadow-pink-600/20 hover:scale-[1.04] transition-all"
+                          >
+                            <ShoppingCart size={13} /> Buy
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
+            )}
+
+            {/* View All Deals Button */}
+            <div className="mt-14 flex justify-center">
+              <Link to="/deals">
+                <Button className="group bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600 hover:from-pink-500 hover:via-rose-500 hover:to-purple-500 text-white font-black h-13 px-9 rounded-2xl shadow-xl shadow-pink-600/25 hover:shadow-pink-600/40 hover:scale-105 transition-all duration-300 cursor-pointer text-sm gap-3">
+                  <Flame size={18} className="fill-white" />
+                  <span>View All Deals</span>
+                  <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform duration-300" />
+                </Button>
+              </Link>
             </div>
-          </div>
-
-          {/* Deals grid */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-slate-800/50 border border-slate-800 rounded-3xl h-[440px]" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {dealProducts.map((p) => (
-                <div
-                  key={p._id}
-                  className="group bg-slate-950/60 border border-slate-800 rounded-3xl overflow-hidden hover:border-pink-500/40 shadow-xl hover:shadow-pink-500/10 transition-all duration-500 flex flex-col"
-                >
-                  {/* Image */}
-                  <div className="relative bg-slate-900 overflow-hidden h-56">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
-                    <span className="absolute top-4 left-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
-                      -{p.discount}% OFF
-                    </span>
-                    {p.stock === 0 && (
-                      <span className="absolute inset-0 bg-slate-950/75 flex items-center justify-center text-white text-xs font-black uppercase tracking-widest">
-                        Sold Out
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Body */}
-                  <div className="p-6 flex flex-col flex-grow space-y-4">
-                    <div>
-                      <span className="text-[9px] font-black uppercase tracking-[0.18em] text-pink-400">{p.category}</span>
-                      <Link to={`/product/${p._id}`} className="hover:text-pink-400 transition-colors block mt-1">
-                        <h4 className="font-extrabold text-base text-white truncate leading-snug">{p.name}</h4>
-                      </Link>
-                    </div>
-
-                    {/* Stars */}
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex text-amber-400">
-                        {[...Array(5)].map((_, idx) => (
-                          <Star key={idx} size={11} className={idx < Math.round(p.rating) ? "fill-amber-400 text-amber-400" : "text-slate-700"} />
-                        ))}
-                      </div>
-                      <span className="text-[10px] text-slate-500 font-bold">({p.numReviews})</span>
-                    </div>
-
-                    {/* Claim bar */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[11px] font-bold">
-                        <span className="text-slate-400">Claimed <strong className="text-white">{p.claimedPercent}%</strong></span>
-                        <span className="text-pink-400">Only {p.stockLeft} left!</span>
-                      </div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-pink-500 to-purple-600 h-full rounded-full"
-                          style={{ width: `${p.claimedPercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Price + CTA */}
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 mt-auto">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-black text-white">${p.price}</span>
-                        <span className="text-xs text-slate-600 line-through font-semibold">${p.originalPrice}</span>
-                      </div>
-                      <Button
-                        disabled={p.stock === 0}
-                        onClick={(e) => handleAddToCart(p, e)}
-                        className="bg-pink-600 hover:bg-pink-500 text-white h-9 rounded-xl px-4 cursor-pointer text-xs gap-1.5 font-bold shadow-lg shadow-pink-600/20 hover:scale-[1.04] transition-all"
-                      >
-                        <ShoppingCart size={13} /> Buy Now
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* See All Deals Button */}
-          <div className="mt-14 flex justify-center">
-            <Link to="/deals">
-              <Button className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-pink-500/20 hover:scale-105 transition-all cursor-pointer text-sm gap-2">
-                <Flame size={16} /> See All Deals <ArrowRight size={16} />
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
 
