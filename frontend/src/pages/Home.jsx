@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import {
   Laptop, Smartphone, Headphones, Watch,
   Check, Star, ArrowRight, ShoppingCart,
-  Percent, Flame, Clock, Quote
+  Percent, Flame, Clock, Quote,
+  MessageSquarePlus, Eye, X
 } from "lucide-react";
 
 const Home = () => {
@@ -21,6 +22,71 @@ const Home = () => {
   // Countdown Timer
   const [timeLeft, setTimeLeft] = useState({ hours: 6, minutes: 42, seconds: 18 });
 
+  const initialTestimonials = [
+    { name: "Alice Henderson", role: "UI Designer", text: "The MacBook Pro M3 I bought is flawless. Shipping was incredibly fast, and customer support was super helpful throughout!", rating: 5, avatar: "AH", verified: true },
+    { name: "Marcus Brody", role: "Software Engineer", text: "Sony WH-1000XM5 headphones are outstanding. Excellent noise cancelling and authentic product. Will buy again!", rating: 5, avatar: "MB", verified: true },
+    { name: "Clara Vance", role: "Tech Blogger", text: "Best tech shopping experience. The layout is clean, checkout was seamless, and the product quality is top-notch.", rating: 4, avatar: "CV", verified: true },
+    { name: "David Kim", role: "Photographer", text: "Got the DJI Mini 4 Pro drone here. Packed securely, arrived earlier than expected, and works like a dream!", rating: 5, avatar: "DK", verified: true },
+    { name: "Elena Rostova", role: "Product Manager", text: "The Apple Watch Series 9 was an amazing purchase. Smooth order tracking and 100% genuine electronics.", rating: 5, avatar: "ER", verified: true },
+    { name: "Jason Patel", role: "DevOps Lead", text: "Dell XPS 15 is a powerhouse. Great customer service when I had questions about warranty coverage.", rating: 5, avatar: "JP", verified: true },
+  ];
+
+  const [reviewsList, setReviewsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem("aura_client_reviews");
+      return saved ? JSON.parse(saved) : initialTestimonials;
+    } catch {
+      return initialTestimonials;
+    }
+  });
+
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showAllReviewsModal, setShowAllReviewsModal] = useState(false);
+
+  const [reviewForm, setReviewForm] = useState({
+    name: "",
+    role: "",
+    text: "",
+    rating: 5,
+  });
+
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    if (!reviewForm.name.trim() || !reviewForm.text.trim()) {
+      toast.error("Please provide both your name and review comment.");
+      return;
+    }
+
+    const initials = reviewForm.name
+      .trim()
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
+
+    const newRev = {
+      name: reviewForm.name.trim(),
+      role: reviewForm.role.trim() || "Verified Buyer",
+      text: reviewForm.text.trim(),
+      rating: Number(reviewForm.rating) || 5,
+      avatar: initials,
+      verified: true,
+    };
+
+    const updated = [newRev, ...reviewsList];
+    setReviewsList(updated);
+    try {
+      localStorage.setItem("aura_client_reviews", JSON.stringify(updated));
+    } catch (err) {
+      console.error(err);
+    }
+
+    toast.success("Thank you! Your review has been published.");
+    setReviewForm({ name: "", role: "", text: "", rating: 5 });
+    setShowReviewModal(false);
+  };
+
   const categories = [
     { name: "Laptops",      icon: <Laptop size={26} />,      count: "Premium Devices",  bg: "from-blue-500/10 to-indigo-500/10",  border: "hover:border-blue-400/40",   text: "text-blue-500",   num: "01" },
     { name: "Smartphones",  icon: <Smartphone size={26} />,  count: "Next-Gen Mobile",  bg: "from-pink-500/10 to-rose-500/10",    border: "hover:border-pink-400/40",   text: "text-pink-500",   num: "02" },
@@ -28,11 +94,6 @@ const Home = () => {
     { name: "Smartwatches", icon: <Watch size={26} />,       count: "Wearable Tech",    bg: "from-amber-500/10 to-orange-500/10", border: "hover:border-amber-400/40",  text: "text-amber-500",  num: "04" },
   ];
 
-  const testimonials = [
-    { name: "Alice Henderson", role: "UI Designer",       text: "The MacBook Pro M3 I bought is flawless. Shipping was incredibly fast, and customer support was super helpful throughout!", rating: 5, avatar: "AH", verified: true },
-    { name: "Marcus Brody",    role: "Software Engineer", text: "Sony WH-1000XM5 headphones are outstanding. Excellent noise cancelling and authentic product. Will buy again!",           rating: 5, avatar: "MB", verified: true },
-    { name: "Clara Vance",     role: "Tech Blogger",      text: "Best tech shopping experience. The layout is clean, checkout was seamless, and the product quality is top-notch.",         rating: 4, avatar: "CV", verified: true },
-  ];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -351,6 +412,15 @@ const Home = () => {
               ))}
             </div>
           )}
+
+          {/* View All Products Button */}
+          <div className="mt-14 flex justify-center">
+            <Link to="/products">
+              <Button className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-pink-500/20 hover:shadow-pink-500/30 hover:scale-105 transition-all cursor-pointer text-sm gap-2">
+                View All Products <ArrowRight size={16} />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -428,7 +498,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((t, idx) => (
+            {reviewsList.slice(0, 3).map((t, idx) => (
               <div
                 key={idx}
                 className="relative bg-slate-50/60 dark:bg-slate-900/40 p-8 rounded-3xl border border-slate-100 dark:border-slate-800/70 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
@@ -463,6 +533,24 @@ const Home = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Action Buttons for Reviews */}
+          <div className="mt-14 flex flex-wrap items-center justify-center gap-4">
+            <Button
+              onClick={() => setShowReviewModal(true)}
+              className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold h-11 px-6 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer text-sm gap-2"
+            >
+              <MessageSquarePlus size={16} /> Give a Review
+            </Button>
+
+            <Button
+              onClick={() => setShowAllReviewsModal(true)}
+              variant="outline"
+              className="border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-800 dark:text-white font-bold h-11 px-6 rounded-xl transition-all cursor-pointer text-sm gap-2"
+            >
+              <Eye size={16} /> See All Reviews ({reviewsList.length})
+            </Button>
           </div>
         </div>
       </section>
@@ -507,6 +595,197 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* ─────────── Give a Review Modal ─────────── */}
+      {showReviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 sm:p-8 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">Give Your Review</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Share your experience with Aura Store products</p>
+              </div>
+              <button
+                onClick={() => setShowReviewModal(false)}
+                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddReview} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                  Rating
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                      className="p-1 hover:scale-125 transition-transform cursor-pointer"
+                    >
+                      <Star
+                        size={24}
+                        className={
+                          star <= reviewForm.rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300 dark:text-slate-700"
+                        }
+                      />
+                    </button>
+                  ))}
+                  <span className="text-xs font-bold text-slate-500 ml-2">
+                    {reviewForm.rating} of 5 stars
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                  Your Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Sarah Jenkins"
+                  value={reviewForm.name}
+                  onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-pink-500 transition-colors text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                  Role or Product Purchased
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. MacBook Pro Buyer or Creative Director"
+                  value={reviewForm.role}
+                  onChange={(e) => setReviewForm({ ...reviewForm, role: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-pink-500 transition-colors text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                  Your Review *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Write your thoughts about product quality, shipping speed, customer service..."
+                  value={reviewForm.text}
+                  onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm outline-none focus:border-pink-500 transition-colors text-slate-900 dark:text-white resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowReviewModal(false)}
+                  className="rounded-xl font-bold h-10 px-5 cursor-pointer text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold h-10 px-6 rounded-xl shadow-md cursor-pointer text-xs"
+                >
+                  Submit Review
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────── See All Reviews Modal ─────────── */}
+      {showAllReviewsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-4xl max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-5 bg-slate-50/50 dark:bg-slate-950/40">
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white">All Customer Reviews</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Showing {reviewsList.length} verified buyer experiences
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAllReviewsModal(false)}
+                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable Reviews List */}
+            <div className="overflow-y-auto p-6 space-y-4 max-h-[60vh]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {reviewsList.map((rev, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-50/80 dark:bg-slate-950/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col justify-between"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex text-amber-400">
+                          {[...Array(rev.rating)].map((_, starIdx) => (
+                            <Star key={starIdx} size={13} className="fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                        {rev.verified && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded-full border border-teal-200 dark:border-teal-900">
+                            <Check size={9} /> Verified Buyer
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic">
+                        "{rev.text}"
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-200/50 dark:border-slate-800/60">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-200/50 dark:border-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400 font-black text-[10px] shrink-0">
+                        {rev.avatar}
+                      </div>
+                      <div>
+                        <h6 className="font-bold text-slate-900 dark:text-white text-xs">{rev.name}</h6>
+                        <p className="text-[10px] text-slate-400">{rev.role}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/40">
+              <Button
+                onClick={() => {
+                  setShowAllReviewsModal(false);
+                  setShowReviewModal(true);
+                }}
+                className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold h-9 px-4 rounded-xl text-xs gap-1.5"
+              >
+                <MessageSquarePlus size={14} /> Add Your Review
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowAllReviewsModal(false)}
+                className="h-9 px-5 rounded-xl text-xs font-bold"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
