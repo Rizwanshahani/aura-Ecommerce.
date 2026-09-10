@@ -1,18 +1,18 @@
-import user  from "../models/userModel.js";
-import bcrypt from "bcryptjs"
-import jwt, { decode } from "jsonwebtoken"
+import user from "../models/userModel.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { verifyEmail } from "../emailVerify/verifyEmail.js";
 import { Session } from "../models/sessionModel.js";
-import { json, response } from "express";
 import { sendOTPMail } from "../emailVerify/sendOTPMail.js";
-export const register = async(req, res)=>{
+
+export const register = async (req, res) => {
     try {
-        const {firstName, lastName, email, password}= req.body;
-        if( !firstName || !lastName|| !email|| !password){
+        const { firstName, lastName, email, password } = req.body;
+        if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({
-                success:false,
-                message:"All Feilds are required"
-            })
+                success: false,
+                message: "All fields are required"
+            });
         }
         const existinguser= await user.findOne({email})
         if(existinguser){
@@ -75,7 +75,7 @@ export const verify = async (req, res)=>{
         if(!existinguser){
             return res.status(400).json({
                 success:false,
-                message:"user does not found"
+                message:"User not found"
             })
         }
         existinguser.token=null
@@ -109,7 +109,7 @@ export const reVerify = async(req, res)=>{
         await existingUser.save()
         return res.status(200).json({
             success:true,
-            message:"email verification sent again successfully",
+            message:"Verification email sent successfully",
             token:existingUser.token
         })
     } catch (error) {
@@ -126,14 +126,14 @@ export const login = async(req, res)=>{
         if(!email || !password){
             return res.status(400).json({
                 success: false,
-                message:"all feilds are required"
+                message:"All fields are required"
             })
         }
         const existingUser= await user.findOne({email})
         if(!existingUser){
             return res.status(400).json({
                 success:false,
-                message: "User don't exists"
+                message: "User does not exist"
             })
         }
         const isPasswordValid = await bcrypt.compare(password, existingUser.password)
@@ -214,7 +214,7 @@ export const forgetPassword= async(req, res)=>{
         await sendOTPMail(otp,email)
         return res.status(200).json({
             success:true,
-            message:"Otp send successfully"
+            message:"OTP sent successfully"
         })
     } catch (error) {
         return res.status(500).json({
@@ -230,32 +230,32 @@ export const verifyOTP= async(req, res)=>{
         if(!otp){
             return res.status(400).json({
                 success:false,
-                message:'otp is required'
+                message:'OTP is required'
             })
         }
         const User= await user.findOne({email})
         if(!User){
             return res.status(400).json({
                 success:false,
-                message:"user not found"
+                message:"User not found"
             })
         }
         if(!User.otp|| !User.otpExpiry){
             return res.status(400).json({
                 success:false,
-                message:'otp is not generated or already verified'
+                message:'OTP is not generated or already verified'
             })
         }
         if(User.otpExpiry< new Date()){
             return res.status(400).json({
                 success:false,
-                message:"otp expired please request for new otp"
+                message:"OTP expired, please request a new OTP"
         })
     }
     if(otp !== User.otp){
         return res.status(400).json({
             success:false,
-            message:"otp is invalid"
+            message:"OTP is invalid"
         })
     }
     User.otp=null
@@ -263,7 +263,7 @@ export const verifyOTP= async(req, res)=>{
     await User.save()
     return res.status(200).json({
         success:true,
-        message:'otp verified sucessfully'
+        message:'OTP verified successfully'
     })
     } catch (error) {
         return res.status(500).json({
@@ -286,13 +286,13 @@ export const changePassword = async(req, res)=>{
         if(!newPassword||!confirmPassword){
              return res.status(400).json({
                 success:false,
-                message:"all feilds are required"
+                message:"All fields are required"
         })
         }
         if(newPassword!==confirmPassword){
             return res.status(400).json({
                 success:false,
-                message:"password not match"
+                message:"Passwords do not match"
         })
         }
         const hashPassword=await bcrypt.hash(newPassword, 10)
@@ -300,7 +300,7 @@ export const changePassword = async(req, res)=>{
         await User.save()
         return res.status(200).json({
             success:true,
-            message:"password change successfully"
+            message:"Password changed successfully"
         })
     } catch (error) {
          return res.status(500).json({
