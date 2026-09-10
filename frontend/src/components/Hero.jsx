@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, ShieldCheck, Zap, Star } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck, Zap, Star, Flame } from "lucide-react";
 
 const Hero = () => {
   return (
@@ -59,13 +59,17 @@ const Hero = () => {
                   Shop Catalog <ArrowRight size={17} />
                 </Button>
               </Link>
-              <Link to="/products?sort=price-asc">
+              <Link to="/deals">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-slate-700 hover:border-pink-500/60 hover:bg-slate-900/70 text-slate-300 px-9 cursor-pointer h-12 rounded-xl transition-all duration-300 font-semibold tracking-wide"
+                  className="group relative border-pink-500/50 hover:border-pink-400 bg-slate-900/80 hover:bg-pink-950/40 text-white px-7 cursor-pointer h-12 rounded-xl transition-all duration-300 hover:scale-[1.03] font-bold tracking-wide flex items-center gap-2.5 shadow-lg shadow-pink-950/40 hover:shadow-pink-600/25"
                 >
-                  View Deals
+                  <Flame size={17} className="text-pink-400 group-hover:text-pink-300 transition-colors animate-pulse" />
+                  <span>View Deals</span>
+                  <span className="text-[10px] uppercase font-black tracking-wider bg-pink-500/20 text-pink-300 border border-pink-500/30 px-2 py-0.5 rounded-md ml-1">
+                    Hot
+                  </span>
                 </Button>
               </Link>
             </div>
@@ -111,33 +115,36 @@ const Hero = () => {
               {/* Main image frame */}
               <div className="relative p-2 bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-slate-700/50 rounded-3xl backdrop-blur-md shadow-2xl transition-all duration-500 hover:scale-[1.015] hover:border-slate-600/60">
                 <img
-                  src="/aura-hero1.png"
-                  alt="Latest Electronics Showcase"
-                  width={520}
-                  height={420}
-                  className="rounded-2xl object-cover w-full"
+                  src="/luxury-hero.jpg"
+                  alt="Luxury Tech Showcase - Smartphones, Laptops & Audio Gear"
+                  width={640}
+                  height={480}
+                  className="rounded-2xl object-cover w-full shadow-2xl aspect-[4/3]"
                   onError={(e) => {
-                    e.target.src = "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=640&auto=format&fit=crop&q=85";
+                    e.target.src = "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=1200&auto=format&fit=crop&q=85";
                   }}
                 />
 
                 {/* Floating offer card */}
-                <div className="absolute bottom-7 left-6 bg-slate-950/95 border border-slate-800 text-white rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-lg flex items-center gap-3 animate-bounce">
-                  <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping" />
+                <div className="absolute bottom-7 left-6 bg-slate-950/90 border border-pink-500/30 text-white rounded-2xl px-4 py-3 shadow-2xl backdrop-blur-xl flex items-center gap-3 transition-transform duration-300 hover:scale-105">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
+                  </span>
                   <div>
-                    <p className="text-[10px] font-semibold text-slate-400 leading-none uppercase tracking-wider">Flash Sale</p>
-                    <p className="text-sm font-extrabold text-pink-400 mt-0.5">Up to 40% Off</p>
+                    <p className="text-[10px] font-bold text-slate-400 leading-none uppercase tracking-wider">Flash Sale Live</p>
+                    <p className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-300 mt-0.5">Up to 40% Off</p>
                   </div>
                 </div>
 
                 {/* Floating rating card */}
-                <div className="absolute top-6 right-6 bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 shadow-xl backdrop-blur-lg">
+                <div className="absolute top-6 right-6 bg-slate-950/90 border border-slate-800/80 rounded-2xl px-3.5 py-2.5 shadow-2xl backdrop-blur-xl transition-transform duration-300 hover:scale-105">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={10} className="fill-amber-400 text-amber-400" />
+                      <Star key={i} size={11} className="fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-0.5 font-semibold">5,000+ reviews</p>
+                  <p className="text-[10px] text-slate-300 mt-1 font-bold">5,000+ Verified Buyers</p>
                 </div>
               </div>
             </div>
