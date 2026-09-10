@@ -4,10 +4,12 @@ dotenv.config({ override: false }) // Vercel env vars take priority over .env fi
 import connectDB from './database/db.js';
 import { seedProducts } from './seed/productSeeder.js';
 import { setupAdmin } from './seed/adminSetup.js';
+import Product from './models/productModel.js';
 import userRoute from './routes/userRoute.js'
 import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import cors from 'cors'
+
 
 const app = express()
 
@@ -37,8 +39,8 @@ app.get('/api/v1/seed', seedProducts);
 // Force reseed — clears ALL products and reseeds with correct electronics
 app.get('/api/v1/reseed', async (req, res) => {
     try {
-        const Product = (await import('./models/productModel.js')).default;
         await Product.deleteMany({});
+
         // Now call seed which will insert since collection is empty
         const products = [
             { name: "MacBook Pro M3", description: "Supercharged by the Apple M3 chip. Features a gorgeous Liquid Retina XDR display, up to 22 hours of battery life.", price: 1599, category: "Laptops", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60", stock: 12, rating: 4.8, numReviews: 0, reviews: [] },
