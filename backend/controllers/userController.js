@@ -1,6 +1,7 @@
 import user from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { verifyEmail } from "../emailVerify/verifyEmail.js";
 import { Session } from "../models/sessionModel.js";
 import { sendOTPMail } from "../emailVerify/sendOTPMail.js";
@@ -32,10 +33,22 @@ export const register = async (req, res) => {
         await verifyEmail(token, email)
         newUser.token= token
         await newUser.save()
+
+        const sanitizedUser = {
+            _id: newUser._id,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            email: newUser.email,
+            role: newUser.role,
+            isVerified: newUser.isVerified,
+            createdAt: newUser.createdAt,
+            updatedAt: newUser.updatedAt
+        };
+
         return res.status(201).json({
             success:true,
             message:'user registered successfully',
-            user:newUser
+            user: sanitizedUser
         })
     } catch (error) {
         res.status(500).json({
@@ -162,10 +175,26 @@ export const login = async(req, res)=>{
       }
 
       await Session.create({userId:existingUser._id})
+
+      const sanitizedUser = {
+        _id: existingUser._id,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
+        email: existingUser.email,
+        role: existingUser.role,
+        isVerified: existingUser.isVerified,
+        address: existingUser.address,
+        city: existingUser.city,
+        zipCode: existingUser.zipCode,
+        phoneNo: existingUser.phoneNo,
+        createdAt: existingUser.createdAt,
+        updatedAt: existingUser.updatedAt
+      };
+
       return res.status(200).json({
         success:true,
         message:`Welcome back, ${existingUser.firstName}`,
-        user:existingUser,
+        user: sanitizedUser,
         accessToken,
         refreshToken
       })
@@ -258,13 +287,18 @@ export const verifyOTP= async(req, res)=>{
             message:"OTP is invalid"
         })
     }
-    User.otp=null
-    User.otpExpiry=null
-    await User.save()
-    return res.status(200).json({
-        success:true,
-        message:'OTP verified successfully'
-    })
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        User.otp = null;
+        User.otpExpiry = null;
+        User.resetPasswordToken = resetToken;
+        User.resetPasswordTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
+        await User.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'OTP verified successfully',
+            resetToken
+        });
     } catch (error) {
         return res.status(500).json({
             success:false,
@@ -274,7 +308,7 @@ export const verifyOTP= async(req, res)=>{
 }
 export const changePassword = async(req, res)=>{
     try {
-        const {newPassword,confirmPassword}=req.body;
+        const {newPassword, confirmPassword, resetToken}=req.body;
         const {email}=req.params;
         const User= await user.findOne({email})
         if(!User){
@@ -283,6 +317,21 @@ export const changePassword = async(req, res)=>{
                 message:"User not found"
             })
         }
+
+        // Verify that OTP was validated and reset session is active
+        if (
+            !resetToken ||
+            !User.resetPasswordToken ||
+            User.resetPasswordToken !== resetToken ||
+            !User.resetPasswordTokenExpiry ||
+            User.resetPasswordTokenExpiry < new Date()
+        ) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized or expired reset session. Please verify OTP first."
+            });
+        }
+
         if(!newPassword||!confirmPassword){
              return res.status(400).json({
                 success:false,
@@ -295,8 +344,17 @@ export const changePassword = async(req, res)=>{
                 message:"Passwords do not match"
         })
         }
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters long"
+            });
+        }
+
         const hashPassword=await bcrypt.hash(newPassword, 10)
         User.password=hashPassword
+        User.resetPasswordToken = null;
+        User.resetPasswordTokenExpiry = null;
         await User.save()
         return res.status(200).json({
             success:true,
@@ -311,11 +369,11 @@ export const changePassword = async(req, res)=>{
 }
 export const allUser = async(_, res)=>{
     try {
-        const users= await user.find()
-         return res.status(200).json({
+        const users= await user.find().select("-password -token -otp -otpExpiry -resetPasswordToken -resetPasswordTokenExpiry")
+        return res.status(200).json({
             success:true,
             users
-     } )
+        })
     } catch (error) {
          return res.status(500).json({
             success:false,

@@ -9,11 +9,7 @@ export const createOrder = async (req, res) => {
         const {
             orderItems,
             shippingAddress,
-            paymentMethod,
-            itemsPrice,
-            taxPrice,
-            shippingPrice,
-            totalPrice
+            paymentMethod
         } = req.body;
 
         if (!orderItems || orderItems.length === 0) {
@@ -23,36 +19,53 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // Verify and update stocks
+        // Verify items and recalculate prices strictly from the database
+        const verifiedOrderItems = [];
+        let calculatedItemsPrice = 0;
+
         for (const item of orderItems) {
             const product = await Product.findById(item.product);
             if (!product) {
                 return res.status(404).json({
                     success: false,
-                    message: `Product ${item.name} not found`
+                    message: `Product ${item.name || 'item'} not found`
                 });
             }
             if (product.stock < item.qty) {
                 return res.status(400).json({
                     success: false,
-                    message: `Insufficient stock for ${item.name}. Available: ${product.stock}`
+                    message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
                 });
             }
             // Reduce stock
             product.stock -= item.qty;
             await product.save();
+
+            calculatedItemsPrice += product.price * item.qty;
+            verifiedOrderItems.push({
+                product: product._id,
+                name: product.name,
+                image: product.image,
+                price: product.price, // enforce DB product price
+                qty: item.qty
+            });
         }
+
+        // Recalculate shipping, tax, and total server-side
+        const calculatedShippingPrice = calculatedItemsPrice > 500 ? 0 : 25;
+        const calculatedTaxPrice = Number((0.08 * calculatedItemsPrice).toFixed(2));
+        const calculatedTotalPrice = Number((calculatedItemsPrice + calculatedShippingPrice + calculatedTaxPrice).toFixed(2));
 
         // Create Order
         const order = new Order({
             user: req.user._id,
-            orderItems,
+            orderItems: verifiedOrderItems,
             shippingAddress,
-            paymentMethod,
-            itemsPrice,
-            taxPrice,
-            shippingPrice,
-            totalPrice,
+            paymentMethod: paymentMethod || "Card",
+            itemsPrice: calculatedItemsPrice,
+            taxPrice: calculatedTaxPrice,
+            shippingPrice: calculatedShippingPrice,
+            totalPrice: calculatedTotalPrice,
             isPaid: true, // For mock payments we mark it paid instantly
             paidAt: Date.now()
         });

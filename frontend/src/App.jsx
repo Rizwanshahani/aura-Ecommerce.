@@ -12,6 +12,7 @@ import Checkout from './pages/Checkout'
 import OrderDetails from './pages/OrderDetails'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminRoute from './components/AdminRoute'
 import Deals from './pages/Deals'
 import Reviews from './pages/Reviews'
 import About from './pages/About'
@@ -74,7 +75,13 @@ const router= createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <><Navbar/><AdminDashboard/><Footer/></>
+    element: (
+      <AdminRoute>
+        <Navbar />
+        <AdminDashboard />
+        <Footer />
+      </AdminRoute>
+    )
   },
   {
     path: "/about",

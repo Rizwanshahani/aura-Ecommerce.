@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config({ override: false });
 import connectDB from './database/db.js';
-import { seedProducts } from './seed/productSeeder.js';
 import userRoute from './routes/userRoute.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
@@ -22,10 +21,9 @@ app.use(async (req, res, next) => {
         await connectDB();
         next();
     } catch (err) {
-        console.error('Database connection error:', err.message);
         return res.status(500).json({
             success: false,
-            message: 'Database connection failed'
+            message: 'Service unavailable'
         });
     }
 });
@@ -35,14 +33,11 @@ app.use('/api/v1/user', userRoute);
 app.use('/api/v1/product', productRoutes);
 app.use('/api/v1/order', orderRoutes);
 
-// Seed route (only seeds if database collection is empty)
-app.get('/api/v1/seed', seedProducts);
-
-// Health check
+// Health check (minimal, non-leaking)
 app.get('/api/v1/healthcheck', (req, res) => {
-    res.json({
+    res.status(200).json({
         success: true,
-        message: 'Aura E-commerce API is running'
+        message: 'API is running'
     });
 });
 
