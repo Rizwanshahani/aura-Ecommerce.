@@ -326,6 +326,15 @@ const Home = () => {
               ))}
             </div>
           )}
+
+          {/* See All Deals Button */}
+          <div className="mt-14 flex justify-center">
+            <Link to="/deals">
+              <Button className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-pink-500/20 hover:scale-105 transition-all cursor-pointer text-sm gap-2">
+                <Flame size={16} /> See All Deals <ArrowRight size={16} />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -544,13 +553,14 @@ const Home = () => {
               <MessageSquarePlus size={16} /> Give a Review
             </Button>
 
-            <Button
-              onClick={() => setShowAllReviewsModal(true)}
-              variant="outline"
-              className="border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-800 dark:text-white font-bold h-11 px-6 rounded-xl transition-all cursor-pointer text-sm gap-2"
-            >
-              <Eye size={16} /> See All Reviews ({reviewsList.length})
-            </Button>
+            <Link to="/reviews">
+              <Button
+                variant="outline"
+                className="border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-800 dark:text-white font-bold h-11 px-6 rounded-xl transition-all cursor-pointer text-sm gap-2"
+              >
+                <Eye size={16} /> See All Reviews ({reviewsList.length}) <ArrowRight size={14} />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -12,6 +12,8 @@ import Checkout from './pages/Checkout'
 import OrderDetails from './pages/OrderDetails'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
+import Deals from './pages/Deals'
+import Reviews from './pages/Reviews'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import FAQ from './pages/FAQ'
@@ -21,6 +23,14 @@ const router= createBrowserRouter([
   {
     path:'/',
     element:<><Navbar/><Home/><Footer/></>
+  },
+  {
+    path:'/deals',
+    element:<><Navbar/><Deals/><Footer/></>
+  },
+  {
+    path:'/reviews',
+    element:<><Navbar/><Reviews/><Footer/></>
   },
   {
     path:'/signup',
