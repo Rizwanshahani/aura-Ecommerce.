@@ -95,8 +95,15 @@ const Footer = () => {
       {/* Top Newsletter & Brand Bar */}
       <div className="border-b border-slate-900 py-12">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-          <div className="space-y-2 text-left">
-            <span className="text-2xl font-black text-white tracking-widest bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent">AURA.</span>
+          <div className="space-y-3 text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-slate-900 border border-pink-500/30 overflow-hidden shadow-lg shadow-pink-500/10 p-0.5 flex items-center justify-center">
+                <img src="/aura.png" alt="AURA Logo" className="w-full h-full object-cover rounded-[10px]" />
+              </div>
+              <span className="text-2xl font-black text-white tracking-[0.2em] bg-gradient-to-r from-white via-slate-100 to-pink-400 bg-clip-text text-transparent">
+                AURA
+              </span>
+            </div>
             <p className="text-xs text-slate-500 max-w-sm">
               Discover cutting-edge technology with unbeatable deals and seamless premium shopping.
             </p>

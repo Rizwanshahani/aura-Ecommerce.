@@ -73,23 +73,24 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 md:px-8">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-violet-600 shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-slate-950 p-0.5 border border-pink-500/30 group-hover:border-pink-500/70 shadow-lg shadow-pink-500/15 overflow-hidden group-hover:scale-105 transition-all duration-300">
             <img
               src="/aura.png"
               alt="Aura Logo"
-              className="w-8 h-8 rounded-full object-cover"
-              onError={(e) => {
-                // simple fallback if aura.png is not found
-                e.target.style.display = 'none';
-              }}
+              className="w-full h-full object-cover rounded-[10px]"
             />
             {/* Ambient inner glow */}
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-pink-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>
-          <span className="text-xl font-extrabold tracking-wider bg-gradient-to-r from-pink-600 via-purple-600 to-violet-600 bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
-            AURA
-          </span>
+          <div className="flex flex-col text-left">
+            <span className="text-xl font-black tracking-[0.2em] bg-gradient-to-r from-slate-900 via-slate-800 to-pink-600 dark:from-white dark:via-slate-100 dark:to-pink-400 bg-clip-text text-transparent group-hover:to-purple-500 transition-all duration-300 leading-tight">
+              AURA
+            </span>
+            <span className="text-[8px] font-black uppercase tracking-[0.28em] text-pink-500/80 -mt-0.5">
+              Luxury Tech
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
